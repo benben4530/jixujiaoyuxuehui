@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>证书查询系统</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <button class="close-btn" id="close-btn">×</button>
+            <h1 id="header-title">证书查询</h1>
+            <div class="website" id="website">www.jxjyedu.org.cn</div>
+            <button class="more-btn" id="more-btn"><i class="fas fa-ellipsis-v"></i></button>
+        </div>
+        
+        <div class="certificate-content">
+            <div class="certificate-header">
+                <div class="certificate-title" id="certificate-title">2025年度河南省专业技术人员继续教育公需科目网络学习学时证明</div>
+                <div class="certificate-number">证书编号：<span id="certificate-number">XH41250535081</span></div>
+            </div>
+            
+            <div class="certificate-info">
+                <div class="info-item">姓名：<span class="info-value" id="name">王一晓</span></div>
+                <div class="info-item">完成学时：<span class="info-value" id="hours">30</span></div>
+                <div class="info-item">联系方式：<span class="info-value" id="contact">15649009920</span></div>
+                <div class="info-item">身份证号码：<span class="info-value" id="id-number">654126199305284724</span></div>
+                <div class="info-item">工作单位：<span class="info-value" id="work-unit">中原科技学院</span></div>
+            </div>
+            
+            <div class="learning-content">
+                <div class="section-title">学习内容</div>
+                <div class="content-item">
+                    <div class="course-number">1</div>
+                    <div class="course-info">
+                        <div class="course-name" id="course-name">2025年度公需课</div>
+                        <div class="course-details">完成时间：<span id="complete-date">2025-09-15</span> 学时：<span id="course-hours">30</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 管理员登录功能（默认隐藏，通过快捷键访问） -->
+        <div class="admin-controls" style="display: none;">
+            <button class="btn-admin" id="login-btn">管理员登录</button>
+        </div>
+        
+        <!-- 登录面板 -->
+        <div class="login-overlay" id="login-overlay" style="display: none;"></div>
+        <div class="login-panel" id="login-panel" style="display: none;">
+            <h2>管理员登录</h2>
+            <div class="login-form">
+                <div class="form-group">
+                    <label for="admin-username">用户名</label>
+                    <input type="text" id="admin-username" placeholder="请输入管理员用户名">
+                </div>
+                <div class="form-group">
+                    <label for="admin-password">密码</label>
+                    <input type="password" id="admin-password" placeholder="请输入管理员密码">
+                </div>
+                <button class="btn-primary" id="submit-login">登录</button>
+                <div id="login-error" style="color: red; text-align: center; margin-top: 10px; display: none;">用户名或密码错误</div>
+            </div>
+        </div>
+        
+        <!-- 管理员快捷键提示（仅供管理员查看） -->
+        <!-- 提示：按下组合键 Ctrl+Alt+L 可以打开管理员登录界面 -->
+        
+        <!-- 自定义内容面板（仅管理员可见） -->
+        <div class="customize-panel" id="customize-panel">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3 style="margin: 0; color: #333;">自定义证书内容</h3>
+                <button class="btn-primary" id="logout-btn" style="background-color: #f44336;">退出登录</button>
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label for="user-select">选择用户：</label>
+                <select id="user-select">
+                    <option value="default">默认用户</option>
+                    <option value="zhangsan">张三</option>
+                    <option value="lisi">李四</option>
+                    <option value="wangwu">王五</option>
+                    <option value="new">添加新用户</option>
+                </select>
+                <input type="text" id="new-username" placeholder="输入新用户名" style="display: none; margin-left: 10px; padding: 5px;">
+            </div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="input-header-title">页面标题</label>
+                    <input type="text" id="input-header-title" value="证书查询">
+                </div>
+                <div class="form-group">
+                    <label for="input-website">网站地址</label>
+                    <input type="text" id="input-website" value="www.jxjyedu.org.cn">
+                </div>
+                <div class="form-group">
+                    <label for="input-certificate-title">证书标题</label>
+                    <textarea id="input-certificate-title">2025年度河南省专业技术人员继续教育公需科目网络学习学时证明</textarea>
+                </div>
+                <div class="form-group">
+                    <label for="input-certificate-number">证书编号</label>
+                    <input type="text" id="input-certificate-number" value="XH41250535081">
+                </div>
+                <div class="form-group">
+                    <label for="input-name">姓名</label>
+                    <input type="text" id="input-name" value="王一晓">
+                </div>
+                <div class="form-group">
+                    <label for="input-hours">完成学时</label>
+                    <input type="text" id="input-hours" value="30">
+                </div>
+                <div class="form-group">
+                    <label for="input-contact">联系方式</label>
+                    <input type="text" id="input-contact" value="15649009920">
+                </div>
+                <div class="form-group">
+                    <label for="input-id-number">身份证号码</label>
+                    <input type="text" id="input-id-number" value="654126199305284724">
+                </div>
+                <div class="form-group">
+                    <label for="input-work-unit">工作单位</label>
+                    <input type="text" id="input-work-unit" value="中原科技学院">
+                </div>
+                <div class="form-group">
+                    <label for="input-course-name">课程名称</label>
+                    <input type="text" id="input-course-name" value="2025年度公需课">
+                </div>
+                <div class="form-group">
+                    <label for="input-complete-date">完成时间</label>
+                    <input type="text" id="input-complete-date" value="2025-09-15">
+                </div>
+                <div class="form-group">
+                    <label for="input-course-hours">课程学时</label>
+                    <input type="text" id="input-course-hours" value="30">
+                </div>
+            </div>
+            <div class="admin-actions">
+                <button id="update-btn" class="admin-btn">更新证书内容</button>
+                <button id="generate-link-btn" class="admin-btn">生成用户访问链接</button>
+                <button id="export-data-btn" class="admin-btn">导出数据</button>
+                <button id="import-data-btn" class="admin-btn">导入数据</button>
+            </div>
+            <div id="user-link" style="margin-top: 15px; padding: 10px; background-color: #e8f5e9; border-radius: 4px; display: none;">
+                <p style="margin: 0; color: #333;">用户访问链接：</p>
+                <input type="text" id="generated-link" readonly style="width: 100%; margin-top: 5px; padding: 8px; font-size: 12px;">
+                <button class="btn-primary" id="copy-link-btn" style="margin-top: 5px; font-size: 12px; padding: 5px 10px;">复制链接</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
