@@ -600,13 +600,13 @@ function init() {
     document.getElementById('copy-link-btn').addEventListener('click', copyLink);
     
     // 导出数据按钮事件
-    document。getElementById('export-data-btn')。addEventListener('click'， exportUserData);
+    document.getElementById('export-data-btn').addEventListener('click', exportUserData);
     
     // 导入数据按钮事件
-    document。getElementById('import-data-btn')。addEventListener('click'， importUserData);
+    document.getElementById('import-data-btn').addEventListener('click', importUserData);
     
     // 添加关闭按钮的点击事件
-    document。getElementById('close-btn')。addEventListener('click'， function() {
+    document.getElementById('close-btn').addEventListener('click', function() {
         if (confirm('确定要关闭页面吗？')) {
             window。close();
         }
@@ -628,18 +628,27 @@ function init() {
     document。addEventListener('contextmenu'， function(e) {
         if (isAdminLoggedIn) {
             e。preventDefault();
-            showNotification('管理员模式下禁用右键菜单', 'info');
+            showNotification('管理员模式下禁用右键菜单'， 'info');
         }
     });
     
-    // 添加管理员登录快捷键（Ctrl+Alt+L）
-    document.addEventListener('keydown', function(e) {
-        // 检测 Ctrl+Alt+L 组合键
-        if (e.ctrlKey && e.altKey && e.key.toLowerCase() === 'l') {
-            e.preventDefault();
+    // 添加管理员登录快捷键（Ctrl+Alt+L 或 Shift+Alt+L）
+    document。addEventListener('keydown'， function(e) {
+        // 检测 Ctrl+Alt+L 组合键或 Shift+Alt+L 组合键
+        if ((e.ctrlKey || e.shiftKey) && e.altKey && e.key.toLowerCase() === 'l') {
+            e。preventDefault();
+            showLoginPanel();
+            console.log('管理员登录快捷键已触发');
+        }
+    });
+
+    // 添加备选的管理员登录方式 - 双击页面标题区域
+    document.getElementById('header-title').addEventListener('dblclick', function() {
+        if (!isAdminLoggedIn) {
             showLoginPanel();
         }
     });
+    document.getElementById('header-title').title = '双击打开管理员登录面板';
 }
 
 // 页面加载完成后初始化
