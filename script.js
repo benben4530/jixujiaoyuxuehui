@@ -3,8 +3,8 @@
  * 功能包括：用户数据管理、管理员登录、证书自定义、专属链接生成等
  */
 
-// 存储用户数据
-const userData = {
+// 定义默认用户数据
+const defaultUserData = {
     'default': {
         headerTitle: '证书查询',
         website: 'www.jxjyedu.org.cn',
@@ -171,13 +171,15 @@ function updateCertificate() {
     };
     
     // 保存到本地存储
-    saveUserData();
-    
-    // 更新证书显示
-    loadUserData(currentUser);
-    
-    // 显示更新成功的提示
-    showNotification('证书内容已更新成功！', 'success');
+    if (saveUserData()) {
+        // 更新证书显示
+        loadUserData(currentUser);
+        
+        // 显示更新成功的提示
+        showNotification('证书内容已更新成功！', 'success');
+    } else {
+        showNotification('证书内容已更新但保存失败，请刷新页面后重试', 'warning');
+    }
 }
 
 /**
@@ -233,9 +235,11 @@ function addNewUser() {
         newUsernameInput.style.display = 'none';
         
         // 保存到本地存储
-        saveUserData();
-        
-        showNotification('新用户已添加！', 'success');
+        if (saveUserData()) {
+            showNotification('新用户已添加并成功保存！', 'success');
+        } else {
+            showNotification('用户已添加但保存失败，请刷新页面后重试', 'warning');
+        }
     } else if (userData[newUsername]) {
         showNotification('用户名已存在！', 'error');
     } else {
@@ -467,15 +471,41 @@ function hideLoginPanel() {
 
 /**
  * 保存用户数据到本地存储
+ * @returns {boolean} 保存是否成功
  */
 function saveUserData() {
     try {
         localStorage.setItem('certificateUserData', JSON.stringify(userData));
+        return true;
     } catch (e) {
         console.error('保存用户数据失败:', e);
         showNotification('保存数据失败，可能是存储空间不足', 'error');
+        return false;
     }
 }
+
+/**
+ * 从本地存储加载用户数据
+ * @returns {Object} 用户数据对象
+ */
+function loadUserDataFromStorage() {
+    try {
+        const storedData = localStorage.getItem('certificateUserData');
+        if (storedData) {
+            return JSON.parse(storedData);
+        }
+    } catch (e) {
+        console.error('从本地存储加载用户数据失败:', e);
+        showNotification('加载数据失败，使用默认数据', 'warning');
+    }
+    // 如果没有存储的数据或加载失败，返回默认数据的深拷贝
+    return JSON.parse(JSON.stringify(defaultUserData));
+}
+
+/**
+ * 初始化用户数据 - 从本地存储加载或使用默认数据
+ */
+let userData = loadUserDataFromStorage();
 
 /**
  * 显示通知消息
@@ -545,16 +575,8 @@ function showNotification(message, type = 'info') {
  * 初始化函数
  */
 function init() {
-    // 从本地存储加载用户数据
-    const savedUserData = localStorage.getItem('certificateUserData');
-    if (savedUserData) {
-        try {
-            Object.assign(userData, JSON.parse(savedUserData));
-        } catch (e) {
-            console.error('Failed to load user data from localStorage:', e);
-            showNotification('加载用户数据失败，使用默认数据', 'error');
-        }
-    }
+    // 注意：用户数据已在全局作用域通过loadUserDataFromStorage()初始化
+    // 这里不再重复加载数据，以避免数据状态冲突
     
     // 获取URL中的用户参数
     currentUser = getUserFromUrl();
@@ -578,34 +600,34 @@ function init() {
     document.getElementById('copy-link-btn').addEventListener('click', copyLink);
     
     // 导出数据按钮事件
-    document.getElementById('export-data-btn').addEventListener('click', exportUserData);
+    document。getElementById('export-data-btn')。addEventListener('click'， exportUserData);
     
     // 导入数据按钮事件
-    document.getElementById('import-data-btn').addEventListener('click', importUserData);
+    document。getElementById('import-data-btn')。addEventListener('click'， importUserData);
     
     // 添加关闭按钮的点击事件
-    document.getElementById('close-btn').addEventListener('click', function() {
+    document。getElementById('close-btn')。addEventListener('click'， function() {
         if (confirm('确定要关闭页面吗？')) {
-            window.close();
+            window。close();
         }
     });
     
     // 添加更多按钮的点击事件
-    document.getElementById('more-btn').addEventListener('click', function() {
-        showNotification('更多选项功能待实现', 'info');
+    document。getElementById('more-btn')。addEventListener('click'， function() {
+        showNotification('更多选项功能待实现'， 'info');
     });
     
     // 为登录表单添加键盘事件
-    document.getElementById('admin-password').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
+    document。getElementById('admin-password')。addEventListener('keypress'， function(e) {
+        if (e。key === 'Enter') {
             adminLogin();
         }
     });
     
     // 禁用右键菜单（可选的安全措施）
-    document.addEventListener('contextmenu', function(e) {
+    document。addEventListener('contextmenu'， function(e) {
         if (isAdminLoggedIn) {
-            e.preventDefault();
+            e。preventDefault();
             showNotification('管理员模式下禁用右键菜单', 'info');
         }
     });
