@@ -80,7 +80,7 @@ let currentUser = 'default';
 function getUserFromUrl() {
     const urlParams = new URLSearchParams(window.location.search);
     const userParam = urlParams.get('user');
-    if (userParam && userData[userParam]) {
+    if (userParam) {
         return userParam;
     }
     return 'default';
@@ -293,6 +293,7 @@ function generateUserLink() {
     // 添加环境检测和提示
     const linkContainer = document.getElementById('user-link');
     let environmentHint = document.getElementById('environment-hint');
+    let dataStorageHint = document.getElementById('data-storage-hint');
     
     if (!environmentHint) {
         environmentHint = document.createElement('p');
@@ -301,6 +302,18 @@ function generateUserLink() {
         environmentHint.style.margin = '5px 0 0 0';
         linkContainer.appendChild(environmentHint);
     }
+    
+    if (!dataStorageHint) {
+        dataStorageHint = document.createElement('p');
+        dataStorageHint.id = 'data-storage-hint';
+        dataStorageHint.style.fontSize = '12px';
+        dataStorageHint.style.margin = '5px 0 0 0';
+        dataStorageHint.style.color = '#ff6b6b';
+        linkContainer.appendChild(dataStorageHint);
+    }
+    
+    // 显示数据存储提示
+    dataStorageHint.textContent = '重要提示：用户数据存储在浏览器本地（localStorage），不同设备/浏览器的数据不共享。如需在多设备间同步数据，请使用数据导出/导入功能。';
     
     // 根据当前环境显示不同的提示
     if (host.includes('localhost') || host.includes('127.0.0.1')) {
@@ -316,7 +329,7 @@ function generateUserLink() {
         // 互联网域名
         environmentHint.style.color = '#28a745';
         environmentHint.textContent = '当前为互联网环境：链接可在任何设备上通过互联网访问';
-        showNotification('链接已成功生成！该链接可以通过互联网访问。', 'success');
+        showNotification('链接已成功生成！该链接可以通过互联网访问。请注意，用户数据仅存储在当前浏览器中。', 'success');
     }
     
     // 滚动到链接区域
@@ -470,42 +483,177 @@ function hideLoginPanel() {
 }
 
 /**
- * 保存用户数据到本地存储
+ * 保存用户数据到外部JSON文件
  * @returns {boolean} 保存是否成功
  */
 function saveUserData() {
     try {
-        localStorage.setItem('certificateUserData', JSON.stringify(userData));
+        // 由于浏览器无法直接写入文件系统，我们提供下载功能
+        const dataStr = JSON.stringify(userData, null, 2);
+        const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+        
+        const exportFileDefaultName = 'user_data.json';
+        
+        const linkElement = document.createElement('a');
+        linkElement.setAttribute('href', dataUri);
+        linkElement.setAttribute('download', exportFileDefaultName);
+        linkElement.click();
+        
+        showNotification('用户数据已导出为user_data.json文件，请将此文件上传到服务器根目录', 'info');
         return true;
     } catch (e) {
         console.error('保存用户数据失败:', e);
-        showNotification('保存数据失败，可能是存储空间不足', 'error');
+        showNotification('保存数据失败', 'error');
         return false;
     }
 }
 
 /**
- * 从本地存储加载用户数据
- * @returns {Object} 用户数据对象
+ * 导出用户数据为JSON文件
  */
-function loadUserDataFromStorage() {
+function exportUserData() {
     try {
-        const storedData = localStorage.getItem('certificateUserData');
-        if (storedData) {
-            return JSON.parse(storedData);
-        }
+        const dataStr = JSON.stringify(userData, null, 2);
+        const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+        
+        const exportFileDefaultName = 'certificate_data.json';
+        
+        const linkElement = document.createElement('a');
+        linkElement.setAttribute('href', dataUri);
+        linkElement.setAttribute('download', exportFileDefaultName);
+        linkElement.click();
+        
+        showNotification('用户数据已成功导出！', 'success');
     } catch (e) {
-        console.error('从本地存储加载用户数据失败:', e);
-        showNotification('加载数据失败，使用默认数据', 'warning');
+        console.error('导出用户数据失败:', e);
+        showNotification('导出数据失败，请重试', 'error');
     }
-    // 如果没有存储的数据或加载失败，返回默认数据的深拷贝
-    return JSON.parse(JSON.stringify(defaultUserData));
 }
 
 /**
- * 初始化用户数据 - 从本地存储加载或使用默认数据
+ * 导入用户数据从JSON文件
  */
-let userData = loadUserDataFromStorage();
+function importUserData() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    
+    input.onchange = function(event) {
+        const file = event.target.files[0];
+        if (!file) {
+            return;
+        }
+        
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const importedData = JSON.parse(e.target.result);
+                
+                // 验证导入的数据格式
+                if (typeof importedData === 'object' && importedData !== null) {
+                    // 合并导入的数据与现有数据（导入的数据优先）
+                    userData = { ...userData, ...importedData };
+                    
+                    // 保存到本地存储
+                    if (saveUserData()) {
+                        showNotification('用户数据已成功导入！请刷新页面生效', 'success');
+                        // 重新加载用户选择列表
+                        updateUserSelect();
+                    }
+                } else {
+                    showNotification('导入的数据格式不正确', 'error');
+                }
+            } catch (e) {
+                console.error('导入用户数据失败:', e);
+                showNotification('导入数据失败，文件格式错误', 'error');
+            }
+        };
+        
+        reader.readAsText(file);
+    };
+    
+    input.click();
+}
+
+/**
+ * 更新用户选择列表
+ */
+function updateUserSelect() {
+    const userSelect = document.getElementById('user-select');
+    // 清空现有选项（保留第一个和最后一个选项）
+    while (userSelect.options.length > 2) {
+        userSelect.remove(1);
+    }
+    
+    // 添加所有用户到选择列表
+    for (const userId in userData) {
+        if (userId !== 'default' && userId !== 'addNewUser') {
+            const option = document.createElement('option');
+            option.value = userId;
+            option.textContent = userId;
+            userSelect.insertBefore(option, userSelect.lastChild);
+        }
+    }
+}
+
+/**
+ * 从外部JSON文件加载用户数据
+ * @returns {Object} 用户数据对象
+ */
+function loadUserDataFromFile() {
+    return new Promise((resolve) => {
+        // 尝试从外部文件加载用户数据
+        fetch('user_data.json')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('用户数据文件不存在，状态码: ' + response.status);
+                }
+                return response.json();
+            })
+            .then(externalData => {
+                console.log('成功从外部文件加载用户数据，包含用户:', Object.keys(externalData));
+                // 合并外部数据和默认数据（外部数据优先）
+                const mergedData = { ...JSON.parse(JSON.stringify(defaultUserData)), ...externalData };
+                resolve(mergedData);
+            })
+            .catch(error => {
+                console.log('从外部文件加载用户数据失败，使用默认数据:', error.message);
+                // 显示调试信息
+                if (typeof window !== 'undefined' && window.location.hostname !== 'localhost') {
+                    console.warn('部署环境检测到user_data.json文件加载失败，请确保文件已上传到服务器根目录');
+                }
+                // 使用默认数据
+                resolve(JSON.parse(JSON.stringify(defaultUserData)));
+            });
+    });
+}
+
+/**
+ * 初始化用户数据 - 从外部文件加载或使用默认数据
+ */
+let userData = {};
+
+// 页面加载完成后开始数据加载和初始化
+document.addEventListener('DOMContentLoaded', function() {
+    // 异步加载用户数据
+    loadUserDataFromFile().then(data => {
+        userData = data;
+        console.log('用户数据加载完成，包含用户:', Object.keys(userData));
+        
+        // 更新用户选择列表
+        updateUserSelect();
+        
+        // 初始化页面显示
+        init();
+    }).catch(error => {
+        console.error('用户数据加载失败:', error);
+        userData = JSON.parse(JSON.stringify(defaultUserData));
+        updateUserSelect();
+        
+        // 初始化页面显示
+        init();
+    });
+});
 
 /**
  * 显示通知消息
@@ -575,14 +723,14 @@ function showNotification(message, type = 'info') {
  * 初始化函数
  */
 function init() {
-    // 注意：用户数据已在全局作用域通过loadUserDataFromStorage()初始化
-    // 这里不再重复加载数据，以避免数据状态冲突
-    
     // 获取URL中的用户参数
     currentUser = getUserFromUrl();
     
-    // 加载用户数据
+    // 直接加载用户数据（数据应该在调用init前已加载完成）
     loadUserData(currentUser);
+    
+    // 更新用户选择列表
+    updateUserSelect();
     
     // 添加事件监听器
     document.getElementById('update-btn').addEventListener('click', updateCertificate);
@@ -608,35 +756,35 @@ function init() {
     // 添加关闭按钮的点击事件
     document.getElementById('close-btn').addEventListener('click', function() {
         if (confirm('确定要关闭页面吗？')) {
-            window。close();
+            window.close();
         }
     });
     
     // 添加更多按钮的点击事件
-    document。getElementById('more-btn')。addEventListener('click'， function() {
-        showNotification('更多选项功能待实现'， 'info');
+    document.getElementById('more-btn').addEventListener('click', function() {
+        showNotification('更多选项功能待实现', 'info');
     });
     
     // 为登录表单添加键盘事件
-    document。getElementById('admin-password')。addEventListener('keypress'， function(e) {
-        if (e。key === 'Enter') {
+    document.getElementById('admin-password').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
             adminLogin();
         }
     });
     
     // 禁用右键菜单（可选的安全措施）
-    document。addEventListener('contextmenu'， function(e) {
+    document.addEventListener('contextmenu', function(e) {
         if (isAdminLoggedIn) {
-            e。preventDefault();
-            showNotification('管理员模式下禁用右键菜单'， 'info');
+            e.preventDefault();
+            showNotification('管理员模式下禁用右键菜单', 'info');
         }
     });
     
     // 添加管理员登录快捷键（Ctrl+Alt+L 或 Shift+Alt+L）
-    document。addEventListener('keydown'， function(e) {
+    document.addEventListener('keydown', function(e) {
         // 检测 Ctrl+Alt+L 组合键或 Shift+Alt+L 组合键
         if ((e.ctrlKey || e.shiftKey) && e.altKey && e.key.toLowerCase() === 'l') {
-            e。preventDefault();
+            e.preventDefault();
             showLoginPanel();
             console.log('管理员登录快捷键已触发');
         }
@@ -651,5 +799,4 @@ function init() {
     document.getElementById('header-title').title = '双击打开管理员登录面板';
 }
 
-// 页面加载完成后初始化
-document.addEventListener('DOMContentLoaded', init);
+// 删除重复的DOMContentLoaded事件处理，避免冲突
