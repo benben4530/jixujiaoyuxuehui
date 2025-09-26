@@ -1,17 +1,17 @@
 {
   "default": {
     "headerTitle": "证书查询",
-    "website": "www.jxjyedu.org.cn",
-    "certificateTitle": "2025年度河南省专业技术人员继续教育公需科目网络学习学时证明",
-    "certificateNumber": "XH41250535081",
-    "name": "王一晓",
-    "hours": "30",
-    "contact": "15649009920",
-    "idNumber": "654126199305284724",
-    "workUnit": "中原科技学院",
-    "courseName": "2025年度公需课",
-    "completeDate": "2025-09-15",
-    "courseHours": "30"
+    "website": "x",
+    "certificateTitle": "x",
+    "certificateNumber": "x",
+    "name": "x",
+    "hours": "x",
+    "contact": "x",
+    "idNumber": "x",
+    "workUnit": "x",
+    "courseName": "x",
+    "completeDate": "x",
+    "courseHours": "x"
   },
   "zhangsan": {
     "headerTitle": "证书查询",
@@ -449,3 +449,4 @@
   }
 
 }
+
