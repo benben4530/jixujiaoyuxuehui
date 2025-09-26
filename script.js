@@ -80,10 +80,7 @@ let currentUser = 'default';
 function getUserFromUrl() {
     const urlParams = new URLSearchParams(window.location.search);
     const userParam = urlParams.get('user');
-    if (userParam) {
-        return userParam;
-    }
-    return 'default';
+    return userParam || 'default';
 }
 
 /**
@@ -91,8 +88,11 @@ function getUserFromUrl() {
  * @param {string} userId - 用户ID
  */
 function loadUserData(userId) {
+    // 检查用户是否存在
     if (!userData[userId]) {
-        userId = 'default';
+        // 用户不存在，清空所有显示内容
+        clearCertificateDisplay();
+        return;
     }
     
     const user = userData[userId];
@@ -126,6 +126,25 @@ function loadUserData(userId) {
         document.getElementById('input-complete-date').value = user.completeDate;
         document.getElementById('input-course-hours').value = user.courseHours;
     }
+}
+
+/**
+ * 清空证书显示内容
+ */
+function clearCertificateDisplay() {
+    // 清空所有证书相关字段的显示
+    document.getElementById('header-title').textContent = '';
+    document.getElementById('website').textContent = '';
+    document.getElementById('certificate-title').textContent = '';
+    document.getElementById('certificate-number').textContent = '';
+    document.getElementById('name').textContent = '';
+    document.getElementById('hours').textContent = '';
+    document.getElementById('contact').textContent = '';
+    document.getElementById('id-number').textContent = '';
+    document.getElementById('work-unit').textContent = '';
+    document.getElementById('course-name').textContent = '';
+    document.getElementById('complete-date').textContent = '';
+    document.getElementById('course-hours').textContent = '';
 }
 
 /**
