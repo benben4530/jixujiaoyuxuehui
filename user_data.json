@@ -209,7 +209,7 @@
     "completeDate": "2024-09-08",
     "courseHours": "30"
   },
-  "renhaiyan": {
+  "22": {
     "headerTitle": "证书查询",
     "website": "www.jxjyedu.org.cn",
     "certificateTitle": "2023年度公需课",
@@ -223,7 +223,7 @@
     "completeDate": "2023-09-25",
     "courseHours": "30"
   },
-  "renhaiyann": {
+  "23": {
     "headerTitle": "证书查询",
     "website": "www.jxjyedu.org.cn",
     "certificateTitle": "2023年度专业课",
@@ -447,4 +447,5 @@
     "completeDate": "2024-10-26",
     "courseHours": "30"
   }
+
 }
